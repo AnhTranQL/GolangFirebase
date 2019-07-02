@@ -42,6 +42,16 @@ func Logup(c *gin.Context) {
 		})
 		return
 	}
+	//Check email có đúng định dạng
+	// re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+
+	// if re.MatchString(person.Email) {
+	// 	c.JSON(400, map[string]string{
+	// 		"fault":   "Bad request",
+	// 		"message": "Email không đúng!",
+	// 	})
+	// 	return
+	// }
 
 	if person.PhoneNumber == "" {
 		c.JSON(400, map[string]string{
@@ -49,6 +59,25 @@ func Logup(c *gin.Context) {
 			"message": "Trường Phone Number là bắt buộc!",
 		})
 		return
+	}
+
+	if len(person.PhoneNumber) != 10 {
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Phone number phải gồm 10 số!",
+		})
+		return
+	}
+
+	//Check phone number chứa chữ cái
+	for _, v := range person.PhoneNumber {
+		if v == '.' || v < '0' || v > '9' {
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Phone number chỉ gồm số!",
+			})
+			return
+		}
 	}
 
 	if person.Password == "" {
@@ -223,12 +252,40 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 		return
 	}
 
+	//Check email đúng hay không chưa làm dc nhé
+	// valid := govalidator.IsEmail(person.Email)
+	// if !valid {
+	// 	c.JSON(400, map[string]string{
+	// 		"fault":   "Bad request",
+	// 		"message": "Email không đúng!",
+	// 	})
+	// 	return
+	// }
+
 	if person.PhoneNumber == "" {
 		c.JSON(400, map[string]string{
 			"fault":   "Bad request",
 			"message": "Trường Phone Number là bắt buộc!",
 		})
 		return
+	}
+	//Check phone number k đủ 10 số
+	if len(person.PhoneNumber) != 10 {
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Phone number phải gồm 10 số!",
+		})
+		return
+	}
+	//Check phone number chứa chữ cái
+	for _, v := range person.PhoneNumber {
+		if v == '.' || v < '0' || v > '9' {
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Phone number chỉ gồm số!",
+			})
+			return
+		}
 	}
 
 	//Check email của tài khoản cần update có tồn tại trong hệ thống không,
@@ -272,12 +329,57 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 	//Email không tồn tại trong hệ thống
 	c.JSON(400, map[string]string{
 		"fault":   "Bad request",
-		"message": "Email cần tìm không tồn tại trong hệ thống!",
+		"message": "Email cần update không tồn tại trong hệ thống!",
 	})
 }
 
-// func Ping(c *gin.Context) {
-// 	c.JSON(http.StatusOK, map[string]string{
-// 		"message": "pong",
-// 	})
-// }
+func DeleteUser(c *gin.Context) {
+	person := new(UserEmail)
+	err := c.Bind(person)
+	//Không đọc được dữ liệu
+	if err != nil {
+		c.JSON(404, map[string]string{
+			"fault":   "Not found",
+			"message": "Không thể đọc dữ liệu",
+		})
+		return
+	}
+
+	if person.Email == "" {
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Trường email vaf password  là bắt buộc!",
+		})
+		return
+	}
+
+	//Check email cần tìm kiếm có tồn tại trong hệ thống không, có thì xóa tài khoản
+	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
+	if err1 != nil {
+		log.Fatalln("Error querying database:", err1)
+	}
+
+	for _, r := range results {
+		var d db.User
+		if err := r.Unmarshal(&d); err != nil {
+			log.Fatalln("Error unmarshaling result:", err)
+		}
+		//Email tooonftaij trong hệ thống
+		if d.Email == person.Email {
+			hopperRef := db.GlobalUsersRef.Child(r.Key())
+			if err := hopperRef.Delete(context.Background()); err != nil {
+				log.Fatalln("Error delete child:", err)
+			}
+			c.JSON(200, map[string]string{
+				"message": "Xóa tài khoản thành công!",
+			})
+			return
+		}
+
+	}
+	//Email không tồn tại trong hệ thống
+	c.JSON(400, map[string]string{
+		"fault":   "Bad request",
+		"message": "Email cần xóa không tồn tại trong hệ thống!",
+	})
+}

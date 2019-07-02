@@ -13,6 +13,7 @@ func main() {
 	e.POST("/logup", handler.Logup)
 	e.POST("/getuser", handler.GetUserByEmail)
 	e.PUT("/updateuser", handler.UpdateUserPhoneNumber)
+	e.DELETE("/deleteuser", handler.DeleteUser)
 
 	//err := db.AddData()
 	// if err != nil {
