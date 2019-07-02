@@ -24,6 +24,16 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
+
+	if person.Email == "" || person.Password == "" {
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Trường email vaf password  là bắt buộc!",
+		})
+		return
+	}
+
+	//Retrieve data from firebase
 	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
 		log.Fatalln("Error querying database:", err)
