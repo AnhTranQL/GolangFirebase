@@ -40,7 +40,10 @@ func init() {
 	}
 	GlobalClient = global
 	log.Println("Global client init: %v", GlobalClient)
+	conn := getGlobal()
 
+	ref := conn.NewRef("fireblog")
+	GlobalUsersRef = ref.Child("users")
 }
 
 func getGlobal() *db.Client {
@@ -52,10 +55,10 @@ func getGlobal() *db.Client {
 
 // Seed or put data
 func AddData() error {
-	conn := getGlobal()
+	// conn := getGlobal()
 
-	ref := conn.NewRef("fireblog")
-	GlobalUsersRef = ref.Child("users")
+	// ref := conn.NewRef("fireblog")
+	// GlobalUsersRef = ref.Child("users")
 	err := GlobalUsersRef.Set(context.Background(), map[string]*User{
 		"alanisawesome": {
 			FullName:    "Alan Turing",
