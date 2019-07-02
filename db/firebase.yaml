@@ -1,0 +1,13 @@
+runtime: go
+api_version: go1
+
+handlers:
+- url: /handler
+  static_dir: handler
+
+- url: /.*
+  script: _go_app
+  login: required
+
+env_variables:
+  FIREBASE_BASE: https://demofirebase-3d6aa.firebaseio.com
