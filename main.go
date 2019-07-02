@@ -11,6 +11,8 @@ func main() {
 	//e.GET("/ping", handler.Ping)
 	e.POST("/login", handler.Login)
 	e.POST("/logup", handler.Logup)
+	e.POST("/getuser", handler.GetUserByEmail)
+	e.PUT("/updateuser", handler.UpdateUserPhoneNumber)
 
 	//err := db.AddData()
 	// if err != nil {
