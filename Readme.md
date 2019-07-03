@@ -1,40 +1,75 @@
-func ConnectFirebase() error {
-	// connect firebase
-	ctx := context.Background()
-	opt := option.WithCredentialsFile("db/demofirebasego.json")
-	config := &firebase.Config{DatabaseURL: "https://demofirebase-3d6aa.firebaseio.com"}
+Cài đặt: go get github.com/gin-gonic/gin
+Sau đó Run : go run main.go
 
-	app, err := firebase.NewApp(ctx, config, opt)
-	if err != nil {
-		panic(fmt.Sprintf("error initializing app: %v", err))
-	}
-
-	client, err := app.Database(ctx)
-	if err != nil {
-		log.Fatalln("Error initializing database client:", err)
-	}
-
-	ref := client.NewRef("fireblog")
-
-	usersRef := ref.Child("users")
-	err = usersRef.Set(ctx, map[string]*User{
-		"alanisawesome": {
-			FullName:    "Alan Turing",
-			Email:       "thotranthi@gmail.com",
-			PhoneNumber: "123456789",
-			Password:    "123456",
-		},
-		"gracehop": {
-			FullName:    "Grace Beauty",
-			Email:       "35ngocanh@gmail.com",
-			PhoneNumber: "0987654321",
-			Password:    "123456",
-		},
-	})
-	if err != nil {
-		log.Fatalln("Error setting value:", err)
-	}
-
-	log.Println("Done Connect firebase")
-	return (nil)
+Test: http://127.0.0.1:9090/logup
+Input:
+{
+	"email": "tran.kute@gmail.com",
+	"full_name": "Hehe",
+	"password": "ilikeit",
+	"phonenumber": "1238906548"
 }
+Output:
+{
+    "id": "1562149317",
+    "full_name": "Hehe",
+    "email": "tran.kute@gmail.com",
+    "phonenumber": "1238906548",
+    "password": "ilikeit"
+}
+
+Test http://127.0.0.1:9090/login
+Input:
+{
+	"email": "nana22@gmail.com",
+	"password": "123456"
+}
+Output:
+{
+    "id": "1562147146",
+    "full_name": "Alan Turing22",
+    "email": "nana22@gmail.com",
+    "phonenumber": "2390077865",
+    "password": "123456"
+}
+
+Test http://127.0.0.1:9090/getuser
+Input:
+{
+	"email": "nana22@gmail.com"
+}
+Output:
+{
+    "id": "1562147146",
+    "full_name": "Alan Turing22",
+    "email": "nana22@gmail.com",
+    "phonenumber": "2390077865",
+    "password": "123456"
+}
+
+Test http://127.0.0.1:9090/updateuser
+Input:
+{
+	"email": "nana22@gmail.com",
+	"phonenumber": "1231211167"
+}
+Output:
+{
+    "id": "1562147146",
+    "full_name": "Alan Turing22",
+    "email": "nana22@gmail.com",
+    "phonenumber": "2390077865",
+    "password": "123456"
+}
+
+Test http://127.0.0.1:9090/deleteuser
+Input:
+{
+	"email": "hhhhhhh@gmail.com"
+}
+Output:
+{
+    "message": "Xóa tài khoản thành công!"
+}
+
+Để test toàn bộ func: go test test/handler_test.go

@@ -82,6 +82,26 @@ func Logup(c *gin.Context) {
 		}
 	}
 
+	//Check phone number không trùng trong hệ thống
+	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
+	if err1 != nil {
+		log.Fatalln("Error querying database:", err1)
+	}
+
+	for _, r := range results {
+		var d db.User
+		if err := r.Unmarshal(&d); err != nil {
+			log.Fatalln("Error unmarshaling result:", err)
+		}
+		if d.PhoneNumber == person.PhoneNumber {
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Phone number đã tồn tại trong hệ thống!",
+			})
+			return
+		}
+	}
+	//
 	if person.Password == "" {
 		c.JSON(400, map[string]string{
 			"fault":   "Bad request",
@@ -99,12 +119,12 @@ func Logup(c *gin.Context) {
 	}
 
 	//Check email đăng ký đã tồn tại trong tài khoản hay chưa
-	results, err1 := db.GlobalUsersRef.OrderByChild("email").GetOrdered(context.Background())
+	resultsUp, err1 := db.GlobalUsersRef.OrderByChild("email").GetOrdered(context.Background())
 	if err1 != nil {
 		log.Fatalln("Error querying database:", err1)
 	}
 
-	for _, r := range results {
+	for _, r := range resultsUp {
 		var d db.User
 		if err := r.Unmarshal(&d); err != nil {
 			log.Fatalln("Error unmarshaling result:", err)
@@ -296,6 +316,27 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 		}
 	}
 
+	//Check phone number không trùng trong hệ thống
+	resultsPhone, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
+	if err1 != nil {
+		log.Fatalln("Error querying database:", err1)
+	}
+
+	for _, r := range resultsPhone {
+		var d db.User
+		if err := r.Unmarshal(&d); err != nil {
+			log.Fatalln("Error unmarshaling result:", err)
+		}
+		if d.PhoneNumber == person.PhoneNumber {
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Phone number đã tồn tại trong hệ thống!",
+			})
+			return
+		}
+	}
+	//
+
 	//Check email của tài khoản cần update có tồn tại trong hệ thống không,
 	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
@@ -309,6 +350,15 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 		}
 		//Email tồn tại => Update phonenumber
 		if d.Email == person.Email {
+			//Check phoneNumber update trùng với cũ
+			if person.PhoneNumber == d.PhoneNumber {
+				c.JSON(400, map[string]string{
+					"fault":   "Bad request",
+					"message": "Phone number update trùng với số cũ!",
+				})
+				return
+			}
+			//
 			hopperRef := db.GlobalUsersRef.Child(r.Key())
 			if err := hopperRef.Update(context.Background(), map[string]interface{}{
 				"phonenumber": person.PhoneNumber,
