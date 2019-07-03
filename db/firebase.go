@@ -13,6 +13,7 @@ import (
 )
 
 type User struct {
+	ID          string `json:"id"`
 	FullName    string `json:"full_name,omitempty"`
 	Email       string `json:"email,omitempty"`
 	PhoneNumber string `json:"phonenumber,omitempty"`
@@ -51,6 +52,48 @@ func getGlobal() *db.Client {
 		log.Fatalln("Error get global:", nil)
 	}
 	return GlobalClient
+}
+
+func CheckID(code string) (User, error) {
+	userReturn := User{}
+
+	results, err1 := GlobalUsersRef.OrderByChild("id").GetOrdered(context.Background())
+	if err1 != nil {
+		log.Fatalln("Error querying database:", err1)
+	}
+	var d User
+	for _, r := range results {
+		if err := r.Unmarshal(&d); err != nil {
+			log.Fatalln("Error unmarshaling result:", err)
+		}
+		if d.FullName == code {
+			fmt.Println(d.FullName)
+
+			return d, nil
+		}
+	}
+	return userReturn, nil
+}
+
+func GetOneItem(code string) (User, error) {
+	// var result map[string]interface{}
+	userReturn := User{}
+	result, err := GlobalUsersRef.OrderByChild("id").EqualTo(code).GetOrdered(context.Background())
+	if len(result) == 1 {
+		fmt.Printf("%v", result[0].Key())
+		var user User
+		err = result[0].Unmarshal(&user)
+		if err != nil {
+			return userReturn, err
+		}
+		fmt.Println(user.FullName)
+		return user, nil
+	} else {
+		fmt.Println("len: %d", len(result))
+
+	}
+	return userReturn, fmt.Errorf("%v", "Out of range")
+
 }
 
 //func CheckFullName dùng để check fullname rỗng hay k

@@ -2,8 +2,10 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golangExample/db"
@@ -115,6 +117,7 @@ func Logup(c *gin.Context) {
 			return
 		}
 	}
+	code := fmt.Sprintf("%d", time.Now().Unix())
 	//Thêm account vào hệ thống
 	_, err = db.GlobalUsersRef.Push(context.Background(), &db.User{
 
@@ -122,10 +125,12 @@ func Logup(c *gin.Context) {
 		Email:       person.Email,
 		PhoneNumber: person.PhoneNumber,
 		Password:    person.Password,
+		ID:          code,
 	})
 	if err != nil {
 		log.Fatalln("Error setting value:", err)
 	}
+	person.ID = code
 	c.JSON(http.StatusOK, person)
 	return
 }
@@ -164,9 +169,10 @@ func Login(c *gin.Context) {
 		}
 		if d.Email == person.Email {
 			if d.Password == person.Password {
-				c.JSON(200, map[string]string{
-					"message": "Log in thanh cong",
-				})
+				// c.JSON(200, map[string]string{
+				// 	"message": "Log in thanh cong",
+				// })
+				c.JSON(http.StatusOK, d)
 				return
 			}
 			c.JSON(400, map[string]string{

@@ -1,18 +1,27 @@
 package main
 
 import (
-	"github.com/golangExample/handler"
+	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golangExample/db"
+	"github.com/golangExample/handler"
 )
 
 func main() {
+	rs, err := db.CheckID("1562142687")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(rs)
 	e := gin.Default()
 	e.POST("/login", handler.Login)
 	e.POST("/logup", handler.Logup)
 	e.POST("/getuser", handler.GetUserByEmail)
 	e.PUT("/updateuser", handler.UpdateUserPhoneNumber)
 	e.DELETE("/deleteuser", handler.DeleteUser)
+
 	// if !db.CheckPhoneNumber() {
 	// 	fmt.Printf("Full name Wrong")
 	// } else {
