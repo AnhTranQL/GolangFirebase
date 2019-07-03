@@ -126,6 +126,8 @@ func Logup(c *gin.Context) {
 	if err != nil {
 		log.Fatalln("Error setting value:", err)
 	}
+	c.JSON(http.StatusOK, person)
+	return
 }
 
 //func là dunc dùng để log in vào hệ thống

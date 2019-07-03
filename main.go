@@ -8,12 +8,17 @@ import (
 
 func main() {
 	e := gin.Default()
-	//e.GET("/ping", handler.Ping)
 	e.POST("/login", handler.Login)
 	e.POST("/logup", handler.Logup)
 	e.POST("/getuser", handler.GetUserByEmail)
 	e.PUT("/updateuser", handler.UpdateUserPhoneNumber)
 	e.DELETE("/deleteuser", handler.DeleteUser)
+	// if !db.CheckPhoneNumber() {
+	// 	fmt.Printf("Full name Wrong")
+	// } else {
+	// 	fmt.Printf("Full name true")
+
+	// }
 
 	//err := db.AddData()
 	// if err != nil {
