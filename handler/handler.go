@@ -85,13 +85,23 @@ func Logup(c *gin.Context) {
 	//Check phone number không trùng trong hệ thống
 	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
-		log.Fatalln("Error querying database:", err1)
+		// log.Fatalln("Error querying database:", err1)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Error querying database!",
+		})
+		return
 	}
 
 	for _, r := range results {
 		var d db.User
 		if err := r.Unmarshal(&d); err != nil {
-			log.Fatalln("Error unmarshaling result:", err)
+			// log.Fatalln("Error unmarshaling result:", err)
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Lỗi unmarshal data!",
+			})
+			return
 		}
 		if d.PhoneNumber == person.PhoneNumber {
 			c.JSON(400, map[string]string{
@@ -121,13 +131,23 @@ func Logup(c *gin.Context) {
 	//Check email đăng ký đã tồn tại trong tài khoản hay chưa
 	resultsUp, err1 := db.GlobalUsersRef.OrderByChild("email").GetOrdered(context.Background())
 	if err1 != nil {
-		log.Fatalln("Error querying database:", err1)
+		// log.Fatalln("Error querying database:", err1)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Lỗi querying database!",
+		})
+		return
 	}
 
 	for _, r := range resultsUp {
 		var d db.User
 		if err := r.Unmarshal(&d); err != nil {
-			log.Fatalln("Error unmarshaling result:", err)
+			// log.Fatalln("Error unmarshaling result:", err)
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Lỗi unmarshal data!",
+			})
+			return
 		}
 		if d.Email == person.Email {
 
@@ -148,7 +168,12 @@ func Logup(c *gin.Context) {
 		ID:          code,
 	})
 	if err != nil {
-		log.Fatalln("Error setting value:", err)
+		// log.Fatalln("Error setting value:", err)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Lỗi push data vào firebase!",
+		})
+		return
 	}
 	person.ID = code
 	c.JSON(http.StatusOK, person)
@@ -179,13 +204,23 @@ func Login(c *gin.Context) {
 	//Retrieve data from firebase
 	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
-		log.Fatalln("Error querying database:", err1)
+		// log.Fatalln("Error querying database:", err1)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Lỗi querying  database!",
+		})
+		return
 	}
 	var d db.User
 
 	for _, r := range results {
 		if err := r.Unmarshal(&d); err != nil {
-			log.Fatalln("Error unmarshaling result:", err)
+			// log.Fatalln("Error unmarshaling result:", err)
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Lỗi unmarshal data!",
+			})
+			return
 		}
 		if d.Email == person.Email {
 			if d.Password == person.Password {
@@ -319,7 +354,12 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 	//Check phone number không trùng trong hệ thống
 	resultsPhone, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
-		log.Fatalln("Error querying database:", err1)
+		// log.Fatalln("Error querying database:", err1)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Lỗi querying data!",
+		})
+		return
 	}
 
 	for _, r := range resultsPhone {
@@ -340,13 +380,23 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 	//Check email của tài khoản cần update có tồn tại trong hệ thống không,
 	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
-		log.Fatalln("Error querying database:", err1)
+		// log.Fatalln("Error querying database:", err1)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Lỗi querying database!",
+		})
+		return
 	}
 
 	for _, r := range results {
 		var d db.User
 		if err := r.Unmarshal(&d); err != nil {
-			log.Fatalln("Error unmarshaling result:", err)
+			// log.Fatalln("Error unmarshaling result:", err)
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Lỗi unmarshal data!",
+			})
+			return
 		}
 		//Email tồn tại => Update phonenumber
 		if d.Email == person.Email {
@@ -363,18 +413,33 @@ func UpdateUserPhoneNumber(c *gin.Context) {
 			if err := hopperRef.Update(context.Background(), map[string]interface{}{
 				"phonenumber": person.PhoneNumber,
 			}); err != nil {
-				log.Fatalln("Error updating child:", err)
+				// log.Fatalln("Error updating child:", err)
+				c.JSON(400, map[string]string{
+					"fault":   "Bad request",
+					"message": "Lỗi update child trong firebase!",
+				})
+				return
 			}
 			//Lấy lại thông tin sau khi update
 			resultUpdate, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 			if err1 != nil {
-				log.Fatalln("Error querying database:", err1)
+				// log.Fatalln("Error querying database:", err1)
+				c.JSON(400, map[string]string{
+					"fault":   "Bad request",
+					"message": "Lỗi querying database!",
+				})
+				return
 			}
 
 			for _, r := range resultUpdate {
 				var dUpdate db.User
 				if err := r.Unmarshal(&dUpdate); err != nil {
-					log.Fatalln("Error unmarshaling result:", err)
+					// log.Fatalln("Error unmarshaling result:", err)
+					c.JSON(400, map[string]string{
+						"fault":   "Bad request",
+						"message": "Lỗi unmarshal data!",
+					})
+					return
 				}
 				if dUpdate.Email == person.Email {
 					c.JSON(http.StatusOK, dUpdate)
@@ -414,19 +479,34 @@ func DeleteUser(c *gin.Context) {
 	//Check email cần tìm kiếm có tồn tại trong hệ thống không, có thì xóa tài khoản
 	results, err1 := db.GlobalUsersRef.OrderByKey().GetOrdered(context.Background())
 	if err1 != nil {
-		log.Fatalln("Error querying database:", err1)
+		// log.Fatalln("Error querying database:", err1)
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Lỗi querying database!",
+		})
+		return
 	}
 
 	for _, r := range results {
 		var d db.User
 		if err := r.Unmarshal(&d); err != nil {
-			log.Fatalln("Error unmarshaling result:", err)
+			// log.Fatalln("Error unmarshaling result:", err)
+			c.JSON(400, map[string]string{
+				"fault":   "Bad request",
+				"message": "Lỗi unmarshal data!",
+			})
+			return
 		}
 		//Email tooonftaij trong hệ thống
 		if d.Email == person.Email {
 			hopperRef := db.GlobalUsersRef.Child(r.Key())
 			if err := hopperRef.Delete(context.Background()); err != nil {
-				log.Fatalln("Error delete child:", err)
+				// log.Fatalln("Error delete child:", err)
+				c.JSON(400, map[string]string{
+					"fault":   "Bad request",
+					"message": "Lỗi xóa child trong firebase!",
+				})
+				return
 			}
 			c.JSON(200, map[string]string{
 				"message": "Xóa tài khoản thành công!",
