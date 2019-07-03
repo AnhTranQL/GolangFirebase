@@ -30,7 +30,7 @@ func TestValidLogup(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
 	r.POST("/logup", handler.Logup)
-	data := User{FullName: "Alan Turing22", Email: "nana22@gmail.com", PhoneNumber: "0123456789", Password: "123456"}
+	data := User{FullName: "Alan Turing22", Email: "nana@gmail.com", PhoneNumber: "0123456789", Password: "123456"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
@@ -426,7 +426,7 @@ func TestValidDeleteUser(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
 	r.DELETE("/deleteuser", handler.DeleteUser)
-	data := User{Email: "35ngocanh@gmail.com"}
+	data := User{Email: "nana@gmail.com"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
