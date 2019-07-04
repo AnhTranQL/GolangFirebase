@@ -1,4 +1,6 @@
 Cài đặt: go get github.com/gin-gonic/gin
+go get -u firebase.google.com/go
+go get -u google.golang.org/api/option
 Sau đó Run : go run main.go
 
 Test: http://127.0.0.1:9090/logup
