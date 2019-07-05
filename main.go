@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golangExample/db"
@@ -10,16 +9,26 @@ import (
 )
 
 func main() {
-	rs, err := db.CheckID("1562142687")
-	if err != nil {
-		log.Fatal(err)
+	//  err := db.CheckEmail()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println(rs)
+
+	if !db.CheckEmail() {
+		fmt.Printf("Email Wrong")
+	} else {
+		fmt.Printf("Email true")
+
 	}
-	fmt.Println(rs)
+
 	e := gin.Default()
 	e.POST("/login", handler.Login)
-	e.POST("/logup", handler.Logup)
+	e.POST("/signup", handler.Signup)
 	e.POST("/getuser", handler.GetUserByEmail)
 	e.PUT("/updateuser", handler.UpdateUserPhoneNumber)
+	e.PUT("/disableduser", handler.Disabled)
+	e.PUT("/undisableduser", handler.Undisabled)
 	e.DELETE("/deleteuser", handler.DeleteUser)
 
 	// if !db.CheckPhoneNumber() {

@@ -74,4 +74,35 @@ Output:
     "message": "Xóa tài khoản thành công!"
 }
 
+Test http://127.0.0.1:9090/disableduser
+Input
+{
+	"email": "abc@gmail.com"
+}
+Output
+{
+    "id": "1562211090",
+    "full_name": "Hehe",
+    "email": "abc@gmail.com",
+    "phonenumber": "1238901238",
+    "password": "ilikeit",
+    "disabled": true
+}
+
+Test http://127.0.0.1:9090/undisableduser
+Input
+{
+	"email": "abc@gmail.com"
+}
+Output
+{
+    "id": "1562211090",
+    "full_name": "Hehe",
+    "email": "abc@gmail.com",
+    "phonenumber": "1238901238",
+    "password": "ilikeit",
+    "disabled": false
+}
+
+
 Để test toàn bộ func: go test test/handler_test.go

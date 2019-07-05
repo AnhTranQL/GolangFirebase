@@ -23,19 +23,21 @@ type User struct {
 	PhoneNumber string `json:"phonenumber,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Nickname    string `json:"nickname,omitempty"`
+	Disabled    bool   `json:"disabled"` //false là không khóa, true bị khóa
+
 }
 
-//func TestValidLogup dùng để test cho chức năng log up
-func TestValidLogup(t *testing.T) {
+//func TestValidSignup dùng để test cho chức năng log up
+func TestValidSignup(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
-	r.POST("/logup", handler.Logup)
+	r.POST("/signup", handler.Signup)
 	data := User{FullName: "Alan Turing22", Email: "nana@gmail.com", PhoneNumber: "0123456789", Password: "123456"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
 
-	req, err0 := http.NewRequest("POST", "/logup", (reqData))
+	req, err0 := http.NewRequest("POST", "/signup", (reqData))
 	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
 
 	req.Header.Add("Content-Type", "application/json")
@@ -64,17 +66,17 @@ func TestValidLogup(t *testing.T) {
 
 }
 
-//func TestInvalidLogupFullName dùng để teesst full name log up sai
-func TestInvalidLogupFullName(t *testing.T) {
+//func TestInvalidSignupFullName dùng để teesst full name log up sai
+func TestInvalidSignupFullName(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
-	r.POST("/logup", handler.Logup)
+	r.POST("/signup", handler.Signup)
 	data := User{FullName: "", Email: "thotranthinana@gmail.com", PhoneNumber: "0123456789", Password: "123456"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
 
-	req, err0 := http.NewRequest("POST", "/logup", (reqData))
+	req, err0 := http.NewRequest("POST", "/signup", (reqData))
 	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:   %v", w.Code))
 
 	req.Header.Add("Content-Type", "application/json")
@@ -92,17 +94,17 @@ func TestInvalidLogupFullName(t *testing.T) {
 	assert.Empty(t, respData.FullName, fmt.Sprintf("Bad request. Fullname null. Handler returned:  %v ", w.Code))
 }
 
-//func TestInvalidLogupEmail dùng để teesst email log up sai, email đã tồn tại
-func TestInvalidLogupEmail(t *testing.T) {
+//func TestInvalidSignupEmail dùng để teesst email log up sai, email đã tồn tại
+func TestInvalidSignEmail(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
-	r.POST("/logup", handler.Logup)
+	r.POST("/signup", handler.Signup)
 	data := User{FullName: "Best seller", Email: "nana22@gmail.com", PhoneNumber: "0123456789", Password: "123456"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
 
-	req, err0 := http.NewRequest("POST", "/logup", (reqData))
+	req, err0 := http.NewRequest("POST", "/signup", (reqData))
 	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
 
 	req.Header.Add("Content-Type", "application/json")
@@ -120,17 +122,17 @@ func TestInvalidLogupEmail(t *testing.T) {
 	assert.Empty(t, respData.Email, fmt.Sprintf("Bad request. Email null. Handler returned:  %v ", w.Code))
 }
 
-//func TestInvalidLogupPhoneNumber dùng để teesst phone number log up sai, phone number k đủ 10 số
-func TestInvalidLogupPhoneNumber(t *testing.T) {
+//func TestInvalidSignupPhoneNumber dùng để teesst phone number log up sai, phone number k đủ 10 số
+func TestInvalidSignupPhoneNumber(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
-	r.POST("/logup", handler.Logup)
+	r.POST("/signup", handler.Signup)
 	data := User{FullName: "Best seller", Email: "", PhoneNumber: "123456789", Password: "123456"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
 
-	req, err0 := http.NewRequest("POST", "/logup", (reqData))
+	req, err0 := http.NewRequest("POST", "/signup", (reqData))
 	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
 
 	req.Header.Add("Content-Type", "application/json")
@@ -148,17 +150,17 @@ func TestInvalidLogupPhoneNumber(t *testing.T) {
 	assert.Empty(t, respData.PhoneNumber, fmt.Sprintf("Bad request. Phone number null.Handler returned: %v ", w.Code))
 }
 
-//func TestInvalidLogupPassword dùng để test password log up , password quá ngắn dưới 6 ký tự
-func TestInvalidLogupPassword(t *testing.T) {
+//func TestInvalidSignupPassword dùng để test password log up , password quá ngắn dưới 6 ký tự
+func TestInvalidSignupPassword(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
-	r.POST("/logup", handler.Logup)
+	r.POST("/signup", handler.Signup)
 	data := User{FullName: "Best seller", Email: "aaa@gmail.com", PhoneNumber: "123456789", Password: "3456"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
 
-	req, err0 := http.NewRequest("POST", "/logup", (reqData))
+	req, err0 := http.NewRequest("POST", "/signup", (reqData))
 	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
 
 	req.Header.Add("Content-Type", "application/json")
@@ -273,7 +275,7 @@ func TestValidGetUserByEmail(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
 	r.POST("/getuser", handler.GetUserByEmail)
-	data := User{Email: "nana22@gmail.com"}
+	data := User{Email: "nana@gmail.com"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
@@ -335,7 +337,7 @@ func TestValidUpdateUserPhoneNumber(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := gin.Default()
 	r.PUT("/updateuser", handler.UpdateUserPhoneNumber)
-	data := User{Email: "nana22@gmail.com", PhoneNumber: "2390077865"}
+	data := User{Email: "nana@gmail.com", PhoneNumber: "2390077844"}
 
 	reqData := new(bytes.Buffer)
 	json.NewEncoder(reqData).Encode(data)
@@ -451,6 +453,10 @@ func TestValidDeleteUser(t *testing.T) {
 	// assert.Empty(t, rs.Email, fmt.Sprintf("Not acceptable. Handler returned %v", w.Code))
 }
 
+// func TestValidDisabledUser
+// func TestValidDisabledUser(t *testing.T){
+// 	w :=
+// }
 //func TestInvalidDeleteUserWithEmail dùng để test delete user sai, vì email không tồn tại
 func TestInvalidDeleteUserWithEmail(t *testing.T) {
 	w := httptest.NewRecorder()

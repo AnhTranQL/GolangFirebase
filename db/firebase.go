@@ -19,6 +19,7 @@ type User struct {
 	PhoneNumber string `json:"phonenumber,omitempty"`
 	Password    string `json:"password,omitempty"`
 	Nickname    string `json:"nickname,omitempty"`
+	Disabled    bool   `json:"disabled"` //false là không khóa, true bị khóa
 }
 
 var GlobalClient *db.Client
@@ -93,12 +94,43 @@ func GetOneItem(code string) (User, error) {
 
 	}
 	return userReturn, fmt.Errorf("%v", "Out of range")
+}
 
+//func CheckEmail
+
+func CheckEmail() bool {
+	//var c *gin.Context = new(gin.Context)
+	results, err := GlobalUsersRef.OrderByChild("email").GetOrdered(context.Background())
+	if err != nil {
+		// c.JSON(400, map[string]string{
+		// 	"fault":   "Bad request",
+		// 	"message": "Lỗi querying database",
+		// })
+		return false
+	}
+	var d User
+	for _, r := range results {
+		if err := r.Unmarshal(&d); err != nil {
+			// c.JSON(400, map[string]string{
+			// 	"fault":   "Bad request",
+			// 	"message": "Lỗi unmarshal data",
+			// })
+			return false
+		}
+
+		if d.Email == "" {
+			// c.JSON(400, map[string]string{
+			// 	"fault":   "Bad request",
+			// 	"message": "Hệ thống chứa email rỗng",
+			// })
+			return false
+		}
+	}
+	return true
 }
 
 //func CheckFullName dùng để check fullname rỗng hay k
 func CheckFullName() bool {
-
 	results, err1 := GlobalUsersRef.OrderByChild("full_name").GetOrdered(context.Background())
 	if err1 != nil {
 		log.Fatalln("Error querying database:", err1)
@@ -115,6 +147,7 @@ func CheckFullName() bool {
 	return true
 }
 
+//Check phonenumber rỗng, kp là SĐT
 func CheckPhoneNumber() bool {
 
 	results, err1 := GlobalUsersRef.OrderByChild("full_name").GetOrdered(context.Background())
@@ -138,6 +171,7 @@ func CheckPhoneNumber() bool {
 	return true
 }
 
+//
 // Seed or put data
 func AddData() error {
 	// conn := getGlobal()
