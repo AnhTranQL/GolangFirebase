@@ -453,10 +453,131 @@ func TestValidDeleteUser(t *testing.T) {
 	// assert.Empty(t, rs.Email, fmt.Sprintf("Not acceptable. Handler returned %v", w.Code))
 }
 
-// func TestValidDisabledUser
-// func TestValidDisabledUser(t *testing.T){
-// 	w :=
-// }
+// func TestValidDisabledUser dùng để test khóa tài khoản của một user
+func TestValidDisabledUser(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := gin.Default()
+	r.PUT("/disableduser", handler.Disabled)
+	data := User{Email: "nana22@gmail.com"}
+
+	reqData := new(bytes.Buffer)
+	json.NewEncoder(reqData).Encode(data)
+
+	req, err0 := http.NewRequest("PUT", "/disableduser", (reqData))
+	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	req.Header.Add("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	resp, err1 := ioutil.ReadAll(w.Body)
+	assert.NoError(t, err1, fmt.Sprintf("Không thể đọc được body. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	var respData User
+	err2 := json.Unmarshal(resp, &respData)
+	assert.NoError(t, err2, fmt.Sprintf("Lỗi unmarshal data. Handler returned:  %v mong muốn %v", w.Code, http.StatusOK))
+
+	assert.NotNil(t, resp, fmt.Sprintf("Not found. Body  null. Handler returned wrong status code: %v ", w.Code))
+	assert.Equal(t, 200, w.Code, fmt.Sprintf("Bad request. Handler returned wrong status code: %v", w.Code))
+	assert.NotEmpty(t, respData.Email, fmt.Sprintf("Bad request. Email không tồn tại trong hệ thống. Handler returned: %v", w.Code))
+
+	//Check từ firebase
+	rs, err := db.GetOneItem(respData.ID)
+	assert.NoError(t, err, fmt.Sprintf("Lỗi get one item. Handler returned:  %v ", w.Code))
+	assert.Equal(t, rs.Email, data.Email, fmt.Sprintf("Not acceptable. Handler returned %v", w.Code))
+	assert.Equal(t, rs.Disabled, true, fmt.Sprintf("Not acceptable. Handler returned %v", w.Code))
+}
+
+// func TestInValidDisabledUser dùng để test khóa tài khoản không thành công , Email không tồn tại trong hệ thống
+func TestInValidDisabledUser(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := gin.Default()
+	r.PUT("/disableduser", handler.Disabled)
+	data := User{Email: "baba@gmail.com"}
+
+	reqData := new(bytes.Buffer)
+	json.NewEncoder(reqData).Encode(data)
+
+	req, err0 := http.NewRequest("PUT", "/disableduser", (reqData))
+	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	req.Header.Add("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	resp, err1 := ioutil.ReadAll(w.Body)
+	assert.NoError(t, err1, fmt.Sprintf("Không thể đọc được body. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	var respData User
+	err2 := json.Unmarshal(resp, &respData)
+	assert.NoError(t, err2, fmt.Sprintf("Lỗi unmarshal data. Handler returned:  %v mong muốn %v", w.Code, http.StatusOK))
+
+	assert.NotNil(t, resp, fmt.Sprintf("Not found. Body  null. Handler returned wrong status code: %v ", w.Code))
+	assert.Equal(t, 400, w.Code, fmt.Sprintf("Bad request. Handler returned wrong status code: %v", w.Code))
+	assert.Empty(t, respData.Email, fmt.Sprintf("Bad request. Email không tồn tại trong hệ thống. Handler returned: %v", w.Code))
+}
+
+// func TestInValidDisabledUser dùng để test mở khóa tài khoản thành công
+
+func TestValidUnDisabledUser(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := gin.Default()
+	r.PUT("/undisableduser", handler.Undisabled)
+	data := User{Email: "nana22@gmail.com"}
+
+	reqData := new(bytes.Buffer)
+	json.NewEncoder(reqData).Encode(data)
+
+	req, err0 := http.NewRequest("PUT", "/undisableduser", (reqData))
+	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	req.Header.Add("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	resp, err1 := ioutil.ReadAll(w.Body)
+	assert.NoError(t, err1, fmt.Sprintf("Không thể đọc được body. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	var respData User
+	err2 := json.Unmarshal(resp, &respData)
+	assert.NoError(t, err2, fmt.Sprintf("Lỗi unmarshal data. Handler returned:  %v mong muốn %v", w.Code, http.StatusOK))
+
+	assert.NotNil(t, resp, fmt.Sprintf("Not found. Body  null. Handler returned wrong status code: %v ", w.Code))
+	assert.Equal(t, 200, w.Code, fmt.Sprintf("Bad request. Handler returned wrong status code: %v", w.Code))
+	assert.NotEmpty(t, respData.Email, fmt.Sprintf("Bad request. Email không tồn tại trong hệ thống. Handler returned: %v", w.Code))
+
+	//Check từ firebase
+	rs, err := db.GetOneItem(respData.ID)
+	assert.NoError(t, err, fmt.Sprintf("Lỗi get one item. Handler returned:  %v ", w.Code))
+	assert.Equal(t, rs.Email, data.Email, fmt.Sprintf("Not acceptable. Handler returned %v", w.Code))
+	assert.Equal(t, rs.Disabled, false, fmt.Sprintf("Not acceptable. Handler returned %v", w.Code))
+}
+
+// func TestInValidDisabledUser dùng để test khóa tài khoản không thành công , Email không tồn tại trong hệ thống
+func TestInValidUnDisabledUser(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := gin.Default()
+	r.PUT("/undisableduser", handler.Undisabled)
+	data := User{Email: "baba@gmail.com"}
+
+	reqData := new(bytes.Buffer)
+	json.NewEncoder(reqData).Encode(data)
+
+	req, err0 := http.NewRequest("PUT", "/undisableduser", (reqData))
+	assert.NoError(t, err0, fmt.Sprintf("Không thể tạo new request. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	req.Header.Add("Content-Type", "application/json")
+	r.ServeHTTP(w, req)
+
+	resp, err1 := ioutil.ReadAll(w.Body)
+	assert.NoError(t, err1, fmt.Sprintf("Không thể đọc được body. Handler returned:  %v mong muốn %v", w.Code, 200))
+
+	var respData User
+	err2 := json.Unmarshal(resp, &respData)
+	assert.NoError(t, err2, fmt.Sprintf("Lỗi unmarshal data. Handler returned:  %v mong muốn %v", w.Code, http.StatusOK))
+
+	assert.NotNil(t, resp, fmt.Sprintf("Not found. Body  null. Handler returned wrong status code: %v ", w.Code))
+	assert.Equal(t, 400, w.Code, fmt.Sprintf("Bad request. Handler returned wrong status code: %v", w.Code))
+	assert.Empty(t, respData.Email, fmt.Sprintf("Bad request. Email không tồn tại trong hệ thống. Handler returned: %v", w.Code))
+}
+
 //func TestInvalidDeleteUserWithEmail dùng để test delete user sai, vì email không tồn tại
 func TestInvalidDeleteUserWithEmail(t *testing.T) {
 	w := httptest.NewRecorder()
