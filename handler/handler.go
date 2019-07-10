@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"regexp"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golangExample/db"
 )
@@ -37,23 +39,24 @@ func Signup(c *gin.Context) {
 		})
 		return
 	}
-	// if person.Email == "" {
-	// 	c.JSON(400, map[string]string{
-	// 		"fault":   "Bad request",
-	// 		"message": "Trường email là bắt buộc!",
-	// 	})
-	// 	return
-	// }
+	if person.Email == "" {
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Trường email là bắt buộc!",
+		})
+		return
+	}
 	//Check email có đúng định dạng
 	// re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-	// if re.MatchString(person.Email) {
-	// 	c.JSON(400, map[string]string{
-	// 		"fault":   "Bad request",
-	// 		"message": "Email không đúng!",
-	// 	})
-	// 	return
-	// }
+	re := regexp.MustCompile("\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\b")
+	if re.MatchString(person.Email) {
+		c.JSON(400, map[string]string{
+			"fault":   "Bad request",
+			"message": "Email không đúng!",
+		})
+		return
+	}
 
 	if person.PhoneNumber == "" {
 		c.JSON(400, map[string]string{

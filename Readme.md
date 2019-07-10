@@ -3,7 +3,7 @@ go get -u firebase.google.com/go
 go get -u google.golang.org/api/option
 Sau đó Run : go run main.go
 
-Test: http://127.0.0.1:9090/logup
+Test: http://127.0.0.1:9090/signup
 Input:
 {
 	"email": "tran.kute@gmail.com",
@@ -89,6 +89,7 @@ Output
     "disabled": true
 }
 
+
 Test http://127.0.0.1:9090/undisableduser
 Input
 {
@@ -104,5 +105,3 @@ Output
     "disabled": false
 }
 
-
-Để test toàn bộ func: go test test/handler_test.go
